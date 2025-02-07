@@ -5,6 +5,76 @@
 </head>
 <body>
     <h1>Welcome to Solar Power System Calculator</h1>
-    <p>More features coming soon!</p>
+    <p><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Calculator - Terra Energy</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        input[type="range"], input[type="text"] { width: 100%; padding: 8px; margin: 5px 0; }
+        .result { margin-top: 20px; font-size: 18px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="terra_energy_logo.png" alt="Terra Energy Logo" width="200">
+        <h2>Solar System Calculator</h2>
+        
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter your name">
+        
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" placeholder="Enter your phone number">
+        
+        <label for="monthlyBill">Monthly Bill (RM):</label>
+        <input type="range" id="monthlyBill" min="100" max="3000" step="50" value="400" oninput="updateCalculation()">
+        <p id="billAmount">RM 400</p>
+        
+        <label for="propertyType">Property Type:</label>
+        <select id="propertyType" onchange="updateCalculation()">
+            <option value="landed">Landed House</option>
+            <option value="farm">Farm</option>
+        </select>
+        
+        <div class="result" id="result"></div>
+        
+        <button onclick="submitForm()">Get Quotation</button>
+    </div>
+
+    <script>
+        function updateCalculation() {
+            let bill = document.getElementById("monthlyBill").value;
+            document.getElementById("billAmount").innerText = "RM " + bill;
+            
+            let installationCost = (bill * 72) * 0.85;
+            let numPanels = Math.ceil(bill / 100) * 5;
+            let inverter = bill > 1000 ? "Huawei" : "Solis";
+            let panelBrand = "Jinko Solar Panels";
+            
+            document.getElementById("result").innerHTML =
+                `<p>Estimated Installation Cost: RM ${installationCost.toFixed(2)}</p>
+                 <p>Recommended Panels: ${numPanels} pcs (${panelBrand})</p>
+                 <p>Inverter Option: ${inverter}</p>`;
+        }
+        
+        function submitForm() {
+            let name = document.getElementById("name").value;
+            let phone = document.getElementById("phone").value;
+            if (name === "" || phone === "") {
+                alert("Please enter your name and phone number.");
+                return;
+            }
+            alert("Quotation has been sent!");
+        }
+        
+        updateCalculation();
+    </script>
+</body>
+</html>
+</p>
 </body>
 </html>
