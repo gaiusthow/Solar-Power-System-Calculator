@@ -7,25 +7,47 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+            margin: 0;
         }
         .container {
+            width: 90%;
             max-width: 500px;
-            margin: auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            background: white;
             border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            text-align: left;
+            margin-top: 10px;
         }
         input, select {
-            width: 80%;
+            width: calc(100% - 20px);
             padding: 8px;
-            margin: 10px 0;
+            margin: 5px 0;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         .slider {
-            width: 80%;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .result {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
         }
         button {
             background-color: green;
@@ -35,6 +57,8 @@
             cursor: pointer;
             font-size: 18px;
             border-radius: 5px;
+            margin-top: 15px;
+            width: 100%;
         }
         button:hover {
             background-color: darkgreen;
@@ -44,28 +68,22 @@
 <body>
 
     <div class="container">
-        <img src="terra-energy-logo.png" alt="Terra Energy Logo" width="150">
         <h2>Solar System Calculator</h2>
 
-        <label for="name">Name:</label>
-        <input type="text" id="name" placeholder="Enter your name">
-
-        <label for="phone">Phone Number:</label>
-        <input type="text" id="phone" placeholder="Enter your phone number">
-
-        <label for="billSlider">Monthly Bill (RM):</label>
-        <input type="range" id="billSlider" class="slider" min="100" max="3000" step="50" value="1000">
-        <p id="billAmount">RM 1000</p>
-
         <label for="propertyType">Property Type:</label>
-        <select id="propertyType">
+        <select id="propertyType" onchange="calculateSolar()">
             <option value="Landed House">Landed House</option>
-            <option value="Apartment">Apartment</option>
             <option value="Commercial">Commercial</option>
         </select>
 
-        <p id="solarOutput">Estimated Solar Output: 1666.67 kWh</p>
-        <p id="installationCost">Estimated Installation Cost: RM 59040</p>
+        <label for="billSlider">Monthly Bill (RM):</label>
+        <input type="range" id="billSlider" class="slider" min="100" max="3000" step="50" value="1000" oninput="calculateSolar()">
+        <p id="billAmount" class="result">RM 1000</p>
+
+        <p id="solarOutput" class="result">Estimated Solar Output: 0 kWh</p>
+        <p id="installationCost" class="result">Estimated Installation Cost: RM 0</p>
+        <p id="systemSize" class="result">System Size: 0 kW</p>
+        <p id="solarPanels" class="result">Solar Panels Needed: 0 pcs</p>
 
         <button onclick="calculateSolar()">Calculate</button>
     </div>
@@ -73,21 +91,45 @@
     <script>
         function calculateSolar() {
             let billAmount = parseInt(document.getElementById("billSlider").value);
-            let estimatedOutput = (billAmount / 0.6).toFixed(2); // Adjust this formula if needed
-            let totalCost = ((billAmount * 72) * 0.82).toFixed(2); // Apply 18% discount
-
+            let propertyType = document.getElementById("propertyType").value;
+            let solarOutput = 0;
+            
+            if (propertyType === "Landed House") {
+                let remainingBill = billAmount;
+                let totalKWh = 0;
+                let tiers = [
+                    { limit: 200, rate: 0.218 },
+                    { limit: 100, rate: 0.334 },
+                    { limit: 300, rate: 0.516 },
+                    { limit: 300, rate: 0.546 },
+                    { limit: Infinity, rate: 0.571 }
+                ];
+                
+                for (let tier of tiers) {
+                    let usage = Math.min(tier.limit, remainingBill / tier.rate);
+                    totalKWh += usage;
+                    remainingBill -= usage * tier.rate;
+                    if (remainingBill <= 0) break;
+                }
+                solarOutput = totalKWh.toFixed(2);
+            } else {
+                solarOutput = (billAmount / 0.55).toFixed(2);
+            }
+            
+            let systemSize = ((solarOutput / 165) * 1.2).toFixed(2);
+            let panelCount = Math.ceil(((systemSize * 1000) / 550) * 1.2);
+            let totalCost = ((billAmount * 72) * 0.82).toFixed(2);
+            
             document.getElementById("billAmount").textContent = "RM " + billAmount;
-            document.getElementById("solarOutput").textContent = "Estimated Solar Output: " + estimatedOutput + " kWh";
+            document.getElementById("solarOutput").textContent = "Estimated Solar Output: " + solarOutput + " kWh";
             document.getElementById("installationCost").textContent = "Estimated Installation Cost: RM " + totalCost;
+            document.getElementById("systemSize").textContent = "System Size: " + systemSize + " kW";
+            document.getElementById("solarPanels").textContent = "Solar Panels Needed: " + panelCount + " pcs";
         }
 
-        document.getElementById("billSlider").addEventListener("input", function () {
-            calculateSolar();
-        });
-
-        // Initial calculation
         calculateSolar();
     </script>
 
 </body>
 </html>
+
