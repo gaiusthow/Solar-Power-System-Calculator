@@ -29,6 +29,7 @@ const SolarCalculator = () => {
   };
 
   const { systemSize, panels, savings, cost } = getSolarDetails();
+  const estimatedTotalSavings = savings * 12 * 25; // Assuming 25 years of solar system lifespan
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg text-center">
@@ -61,6 +62,7 @@ const SolarCalculator = () => {
       <p>Solar Panels Needed: {panels} pcs</p>
       <p>Estimated Monthly Savings: RM {savings}</p>
       <p>Estimated Installation Cost: RM {cost.toLocaleString()}</p>
+      <p className="font-bold text-green-600">Estimated Total Savings Over 25 Years: RM {estimatedTotalSavings.toLocaleString()}</p>
 
       <button className="mt-4 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
         Calculate
