@@ -1,11 +1,4 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Solar Power System Calculator</title>
-</head>
-<body>
-    <h1>Welcome to Solar Power System Calculator</h1>
-    <p><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -23,58 +16,40 @@
     <div class="container">
         <img src="terra_energy_logo.png" alt="Terra Energy Logo" width="200">
         <h2>Solar System Calculator</h2>
-        
+
         <label for="name">Name:</label>
         <input type="text" id="name" placeholder="Enter your name">
-        
+
         <label for="phone">Phone Number:</label>
         <input type="text" id="phone" placeholder="Enter your phone number">
-        
+
         <label for="monthlyBill">Monthly Bill (RM):</label>
         <input type="range" id="monthlyBill" min="100" max="3000" step="50" value="400" oninput="updateCalculation()">
         <p id="billAmount">RM 400</p>
-        
+
         <label for="propertyType">Property Type:</label>
         <select id="propertyType" onchange="updateCalculation()">
             <option value="landed">Landed House</option>
             <option value="farm">Farm</option>
         </select>
-        
-        <div class="result" id="result"></div>
-        
-        <button onclick="submitForm()">Get Quotation</button>
+
+        <div class="result" id="solarOutput">Estimated Solar Output: - kWh</div>
+        <button onclick="calculateSolar()">Calculate</button>
     </div>
 
     <script>
         function updateCalculation() {
             let bill = document.getElementById("monthlyBill").value;
             document.getElementById("billAmount").innerText = "RM " + bill;
-            
-            let installationCost = (bill * 72) * 0.85;
-            let numPanels = Math.ceil(bill / 100) * 5;
-            let inverter = bill > 1000 ? "Huawei" : "Solis";
-            let panelBrand = "Jinko Solar Panels";
-            
-            document.getElementById("result").innerHTML =
-                `<p>Estimated Installation Cost: RM ${installationCost.toFixed(2)}</p>
-                 <p>Recommended Panels: ${numPanels} pcs (${panelBrand})</p>
-                 <p>Inverter Option: ${inverter}</p>`;
         }
-        
-        function submitForm() {
-            let name = document.getElementById("name").value;
-            let phone = document.getElementById("phone").value;
-            if (name === "" || phone === "") {
-                alert("Please enter your name and phone number.");
-                return;
-            }
-            alert("Quotation has been sent!");
+
+        function calculateSolar() {
+            let bill = document.getElementById("monthlyBill").value;
+            let property = document.getElementById("propertyType").value;
+            let output = (bill / 0.6).toFixed(2); // Example calculation
+            document.getElementById("solarOutput").innerText = `Estimated Solar Output: ${output} kWh`;
         }
-        
-        updateCalculation();
     </script>
 </body>
 </html>
-</p>
-</body>
-</html>
+
