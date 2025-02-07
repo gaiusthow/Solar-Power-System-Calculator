@@ -1,112 +1,127 @@
-import { useState } from "react";
-
-export default function SolarCalculator() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [bill, setBill] = useState(350);
-  const [propertyType, setPropertyType] = useState("Landed House");
-  const [solarOutput, setSolarOutput] = useState(0);
-  const [installationCost, setInstallationCost] = useState(0);
-  const [systemSize, setSystemSize] = useState(0);
-  const [panelCount, setPanelCount] = useState(0);
-
-  const calculate = () => {
-    if (!name || !phone) {
-      alert("Please enter your name and phone number to proceed.");
-      return;
-    }
-    
-    const tnbResidentialRates = [
-      { limit: 200, rate: 0.218 },
-      { limit: 100, rate: 0.334 },
-      { limit: 300, rate: 0.516 },
-      { limit: 300, rate: 0.546 },
-      { limit: Infinity, rate: 0.571 },
-    ];
-    
-    let effectiveRate = 0.55; 
-    if (propertyType === "Landed House") {
-      let remainingBill = bill;
-      effectiveRate = 0;
-      for (let tier of tnbResidentialRates) {
-        if (remainingBill > 0) {
-          let usage = Math.min(tier.limit, remainingBill);
-          effectiveRate += usage * tier.rate;
-          remainingBill -= usage;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+            margin: 0;
         }
-      }
-      effectiveRate = bill > 0 ? effectiveRate / bill : 0;
-    }
+        .container {
+            width: 90%;
+            max-width: 450px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        img {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            text-align: left;
+            margin-top: 10px;
+        }
+        input, select {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .slider {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .result {
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+            margin-top: 15px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+    </style>
+</head>
+<body>
 
-    const estimatedSolarOutput = (bill / effectiveRate).toFixed(2);
-    const kwac = ((estimatedSolarOutput / 165) * 1.2).toFixed(2);
-    const panels = Math.ceil((kwac * 1000) / 550 * 1.2);
-    const estimatedInstallationCost = (kwac * 4920).toFixed(2);
-    
-    setSolarOutput(estimatedSolarOutput);
-    setInstallationCost(estimatedInstallationCost);
-    setSystemSize(kwac);
-    setPanelCount(panels);
-  };
+    <div class="container">
+        <img src="terra-energy-logo.png" alt="Terra Energy Logo">
+        <h2>Solar System Calculator</h2>
 
-  return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="bg-white p-6 rounded-xl shadow-md w-96">
-        <h2 className="text-xl font-bold text-center mb-4">Solar System Calculator</h2>
-        
-        <label className="block mb-1">Name:</label>
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-        
-        <label className="block mt-3 mb-1">Phone Number:</label>
-        <input
-          type="text"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-        
-        <label className="block mt-3 mb-1">Bill (RM):</label>
-        <input
-          type="range"
-          min="50"
-          max="2000"
-          value={bill}
-          onChange={(e) => setBill(Number(e.target.value))}
-          className="w-full"
-        />
-        <p className="text-center">RM {bill}</p>
-        
-        <label className="block mt-3 mb-1">Property Type:</label>
-        <select
-          value={propertyType}
-          onChange={(e) => setPropertyType(e.target.value)}
-          className="w-full p-2 border rounded"
-        >
-          <option>Landed House</option>
-          <option>Commercial</option>
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter your name">
+
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" placeholder="Enter your phone number">
+
+        <label for="billSlider">Monthly Bill (RM):</label>
+        <input type="range" id="billSlider" class="slider" min="100" max="3000" step="50" value="1000">
+        <p id="billAmount" class="result">RM 1000</p>
+
+        <label for="propertyType">Property Type:</label>
+        <select id="propertyType">
+            <option value="Landed House">Landed House</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Commercial">Commercial</option>
         </select>
-        
-        <button
-          onClick={calculate}
-          className="mt-4 w-full bg-green-600 text-white py-2 rounded"
-        >
-          Calculate
-        </button>
-        
-        {solarOutput > 0 && (
-          <div className="mt-4 text-center">
-            <p>Estimated Solar Output: {solarOutput} kWh</p>
-            <p>Installation Cost: RM {installationCost}</p>
-            <p>System Size: {systemSize} kW</p>
-            <p>Solar Panels Needed: {panelCount} pcs</p>
-          </div>
-        )}
-      </div>
+
+        <p id="solarOutput" class="result">Estimated Solar Output: 1666.67 kWh</p>
+        <p id="installationCost" class="result">Estimated Installation Cost: RM 59040</p>
+        <p id="systemSize" class="result">System Size: 10 kW</p>
+        <p id="solarPanels" class="result">Solar Panels Needed: 20 pcs</p>
+
+        <button onclick="calculateSolar()">Calculate</button>
     </div>
-  );
-}
+
+    <script>
+        function calculateSolar() {
+            let billAmount = parseInt(document.getElementById("billSlider").value);
+            let solarOutput = (billAmount / 0.6).toFixed(2);  // Solar output calculation
+            let systemSize = ((solarOutput / 165) * 1.2).toFixed(2);  // System size (kWac)
+            let panelCount = Math.ceil(((systemSize * 1000) / 550) * 1.2);  // Total panels with 20% extra
+            let totalCost = ((billAmount * 72) * 0.82).toFixed(2);  // Installation cost with 18% discount
+
+            document.getElementById("billAmount").textContent = "RM " + billAmount;
+            document.getElementById("solarOutput").textContent = "Estimated Solar Output: " + solarOutput + " kWh";
+            document.getElementById("installationCost").textContent = "Estimated Installation Cost: RM " + totalCost;
+            document.getElementById("systemSize").textContent = "System Size: " + systemSize + " kW";
+            document.getElementById("solarPanels").textContent = "Solar Panels Needed: " + panelCount + " pcs";
+        }
+
+        document.getElementById("billSlider").addEventListener("input", function () {
+            calculateSolar();
+        });
+
+        // Initial calculation
+        calculateSolar();
+    </script>
+
+</body>
+</html>
