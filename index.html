@@ -1,74 +1,105 @@
-import React, { useState } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        .container { 
+            width: 90%; max-width: 500px; 
+            margin: 50px auto; padding: 20px; 
+            background: white; border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+        }
+        .calculate-btn { 
+            background-color: #28a745; color: white; 
+            padding: 10px; border: none; cursor: pointer; 
+            font-size: 16px; width: 100%; 
+            margin-top: 10px; border-radius: 5px;
+        }
+        .calculate-btn:hover { background-color: #218838; }
+        select, input { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+        .results { margin-top: 20px; padding: 10px; background: #e9ffe9; border-radius: 5px; }
+    </style>
+</head>
+<body>
 
-const solarData = [
-  { min: 100, max: 199, systemSize: 3.72, panels: 6, savings: 210, cost: 19000 },
-  { min: 200, max: 299, systemSize: 4.96, panels: 8, savings: 280, cost: 20000 },
-  { min: 300, max: 399, systemSize: 6.82, panels: 11, savings: 390, cost: 22550 },
-  { min: 400, max: 499, systemSize: 8.06, panels: 13, savings: 470, cost: 29000 },
-  { min: 500, max: 599, systemSize: 9.92, panels: 16, savings: 590, cost: 32900 },
-  { min: 600, max: 699, systemSize: 10.54, panels: 17, savings: 630, cost: 34100 },
-  { min: 700, max: 899, systemSize: 13.02, panels: 21, savings: 770, cost: 38000 },
-  { min: 900, max: 1000, systemSize: 16.12, panels: 26, savings: 960, cost: 43100 },
-];
+    <div class="container">
+        <img src="TerraGreenEnergylogo.png" alt="Terra Energy" width="150">
+        <h2>Solar System Calculator</h2>
 
-const SolarCalculator = () => {
-  const [bill, setBill] = useState(100);
-  const [propertyType, setPropertyType] = useState("residential");
-  
-  const getSolarDetails = () => {
-    let adjustedBill = bill;
-    if (propertyType === "commercial") {
-      adjustedBill = bill / 0.55; // Convert commercial bill to estimated kWh usage
-    }
-    
-    const match = solarData.find(
-      (data) => adjustedBill >= data.min && adjustedBill <= data.max
-    );
+        <label for="propertyType"><strong>Property Type:</strong></label>
+        <select id="propertyType">
+            <option value="residential">Residential</option>
+            <option value="commercial">Commercial</option>
+        </select>
 
-    return match || { systemSize: 0, panels: 0, savings: 0, cost: 0 };
-  };
+        <label for="monthlyBill"><strong>Monthly Bill (RM):</strong></label>
+        <input type="number" id="monthlyBill" min="100" max="1000" value="100">
 
-  const { systemSize, panels, savings, cost } = getSolarDetails();
-  const estimatedTotalSavings = savings * 12 * 25; // Assuming 25 years of solar system lifespan
+        <button class="calculate-btn" onclick="calculateSolar()">Calculate</button>
 
-  return (
-    <div className="p-6 bg-white rounded-lg shadow-lg text-center">
-      <img src="TerraGreenEnergylogo.png" alt="Terra Energy Logo" className="mx-auto mb-4 w-24" />
-      <h2 className="text-2xl font-bold">Terra Energy</h2>
-      <p className="text-lg mb-4">Solar System Calculator</p>
-
-      <label className="block font-semibold">Monthly Bill (RM):</label>
-      <input
-        type="range"
-        min="100"
-        max="1000"
-        value={bill}
-        onChange={(e) => setBill(Number(e.target.value))}
-        className="w-full"
-      />
-      <p className="text-xl font-bold">RM {bill}</p>
-
-      <label className="block font-semibold">Property Type:</label>
-      <select
-        value={propertyType}
-        onChange={(e) => setPropertyType(e.target.value)}
-        className="border p-2 rounded w-full mb-4"
-      >
-        <option value="residential">Residential</option>
-        <option value="commercial">Commercial</option>
-      </select>
-
-      <p>System Size: {systemSize} kW</p>
-      <p>Solar Panels Needed: {panels} pcs</p>
-      <p>Estimated Monthly Savings: RM {savings}</p>
-      <p>Estimated Installation Cost: RM {cost.toLocaleString()}</p>
-      <p className="font-bold text-green-600">Estimated Total Savings Over 25 Years: RM {estimatedTotalSavings.toLocaleString()}</p>
-
-      <button className="mt-4 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
-        Calculate
-      </button>
+        <div class="results" id="results" style="display:none;">
+            <h3>Results:</h3>
+            <p id="solarOutput"></p>
+            <p id="installationCost"></p>
+            <p id="systemSize"></p>
+            <p id="solarPanels"></p>
+            <p id="monthlySavings"></p>
+        </div>
     </div>
-  );
-};
 
-export default SolarCalculator;
+    <script>
+        function calculateSolar() {
+            let bill = parseFloat(document.getElementById('monthlyBill').value);
+            let propertyType = document.getElementById('propertyType').value;
+
+            if (bill < 100 || bill > 1000 || isNaN(bill)) {
+                alert("Please enter a bill amount between RM 100 and RM 1000.");
+                return;
+            }
+
+            let systemSize = 0, panelsNeeded = 0, installationCost = 0, savings = 0, solarOutput = 0;
+
+            if (propertyType === "residential") {
+                const residentialData = [
+                    { min: 100, max: 199, systemSize: 3.72, panels: 6, savings: 210, cost: 19000 },
+                    { min: 200, max: 299, systemSize: 4.96, panels: 8, savings: 280, cost: 20000 },
+                    { min: 300, max: 399, systemSize: 6.82, panels: 11, savings: 390, cost: 22550 },
+                    { min: 400, max: 499, systemSize: 8.06, panels: 13, savings: 470, cost: 29000 },
+                    { min: 500, max: 599, systemSize: 9.92, panels: 16, savings: 590, cost: 32900 },
+                    { min: 600, max: 699, systemSize: 10.54, panels: 17, savings: 630, cost: 34100 },
+                    { min: 700, max: 899, systemSize: 13.02, panels: 21, savings: 770, cost: 38000 },
+                    { min: 900, max: 1000, systemSize: 16.12, panels: 26, savings: 960, cost: 43100 }
+                ];
+
+                let match = residentialData.find(d => bill >= d.min && bill <= d.max);
+                if (match) {
+                    systemSize = match.systemSize;
+                    panelsNeeded = match.panels;
+                    installationCost = match.cost;
+                    savings = match.savings;
+                    solarOutput = systemSize * 137.6;
+                }
+            } else {
+                // Commercial calculation
+                solarOutput = bill / 0.55;
+                systemSize = solarOutput / 137.6;
+                panelsNeeded = Math.ceil(systemSize * 1.6);
+                installationCost = systemSize * 3500;
+                savings = (bill * 0.9).toFixed(2); // Assuming up to 90% savings
+            }
+
+            document.getElementById('solarOutput').innerHTML = `<strong>Estimated Solar Output:</strong> ${solarOutput.toFixed(2)} kWh`;
+            document.getElementById('installationCost').innerHTML = `<strong>Estimated Installation Cost:</strong> RM ${installationCost.toLocaleString()}`;
+            document.getElementById('systemSize').innerHTML = `<strong>System Size:</strong> ${systemSize.toFixed(2)} kW`;
+            document.getElementById('solarPanels').innerHTML = `<strong>Solar Panels Needed:</strong> ${panelsNeeded} pcs`;
+            document.getElementById('monthlySavings').innerHTML = `<strong>Estimated Monthly Savings:</strong> RM ${savings}`;
+
+            document.getElementById('results').style.display = "block";
+        }
+    </script>
+
+</body>
+</html>
