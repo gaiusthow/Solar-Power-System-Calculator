@@ -1,135 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar System Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f9f9f9;
-            margin: 0;
-        }
-        .container {
-            width: 90%;
-            max-width: 500px;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-        h2 {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            font-weight: bold;
-            text-align: left;
-            margin-top: 10px;
-        }
-        input, select {
-            width: calc(100% - 20px);
-            padding: 8px;
-            margin: 5px 0;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .slider {
-            width: 100%;
-            margin: 10px 0;
-        }
-        .result {
-            font-size: 16px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        button {
-            background-color: green;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 5px;
-            margin-top: 15px;
-            width: 100%;
-        }
-        button:hover {
-            background-color: darkgreen;
-        }
-    </style>
-</head>
-<body>
+import { useState } from "react";
 
-    <div class="container">
-        <h2>Solar System Calculator</h2>
+export default function SolarCalculator() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [bill, setBill] = useState(350);
+  const [propertyType, setPropertyType] = useState("Landed House");
+  const [solarOutput, setSolarOutput] = useState(0);
+  const [installationCost, setInstallationCost] = useState(0);
+  const [panelCount, setPanelCount] = useState(0);
+  const [systemSize, setSystemSize] = useState(0);
+  
+  const calculateSolar = () => {
+    if (!name || !phone) {
+      alert("Please enter your name and phone number before calculating.");
+      return;
+    }
+    
+    const tnbResidentialRate = (bill <= 200) ? 0.218 : (bill <= 300) ? 0.334 : (bill <= 600) ? 0.516 : (bill <= 900) ? 0.546 : 0.571;
+    const tnbCommercialRate = 0.55;
+    const rate = propertyType === "Landed House" ? tnbResidentialRate : tnbCommercialRate;
+    
+    const estimatedSolarOutput = bill / rate;
+    const systemKW = (estimatedSolarOutput / 165) * 1.2;
+    const panelNeeded = Math.ceil((systemKW * 1000 / 550) * 1.2);
+    const estimatedCost = systemKW * 4920;
+    
+    setSolarOutput(estimatedSolarOutput.toFixed(2));
+    setSystemSize(systemKW.toFixed(1));
+    setPanelCount(panelNeeded);
+    setInstallationCost(estimatedCost.toFixed(2));
+  };
 
-        <label for="propertyType">Property Type:</label>
-        <select id="propertyType" onchange="calculateSolar()">
-            <option value="Landed House">Landed House</option>
-            <option value="Commercial">Commercial</option>
+  return (
+    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
+      <img src="/logo.png" alt="Terra Energy Logo" className="mx-auto mb-2" />
+      <h2 className="text-xl font-bold mb-4">Solar System Calculator</h2>
+      
+      <div className="text-left mb-4">
+        <label className="block font-semibold">Name:</label>
+        <input 
+          type="text" 
+          className="border p-2 w-full" 
+          value={name} 
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
+      <div className="text-left mb-4">
+        <label className="block font-semibold">Phone Number:</label>
+        <input 
+          type="text" 
+          className="border p-2 w-full" 
+          value={phone} 
+          onChange={(e) => setPhone(e.target.value)}
+        />
+      </div>
+      
+      <div className="text-left mb-4">
+        <label className="block font-semibold">Bill (RM): {bill}</label>
+        <input 
+          type="range" 
+          min="50" 
+          max="1500" 
+          step="10" 
+          value={bill} 
+          onChange={(e) => setBill(Number(e.target.value))} 
+          className="w-full"
+        />
+      </div>
+      
+      <div className="text-left mb-4">
+        <label className="block font-semibold">Property Type:</label>
+        <select 
+          className="border p-2 w-full" 
+          value={propertyType} 
+          onChange={(e) => setPropertyType(e.target.value)}
+        >
+          <option>Landed House</option>
+          <option>Commercial</option>
         </select>
+      </div>
+      
+      <button 
+        onClick={calculateSolar} 
+        className="bg-green-600 text-white px-4 py-2 rounded"
+      >
+        Calculate
+      </button>
 
-        <label for="billSlider">Monthly Bill (RM):</label>
-        <input type="range" id="billSlider" class="slider" min="100" max="3000" step="50" value="1000" oninput="calculateSolar()">
-        <p id="billAmount" class="result">RM 1000</p>
-
-        <p id="solarOutput" class="result">Estimated Solar Output: 0 kWh</p>
-        <p id="installationCost" class="result">Estimated Installation Cost: RM 0</p>
-        <p id="systemSize" class="result">System Size: 0 kW</p>
-        <p id="solarPanels" class="result">Solar Panels Needed: 0 pcs</p>
-
-        <button onclick="calculateSolar()">Calculate</button>
+      {solarOutput > 0 && (
+        <div className="mt-4 text-left">
+          <p><strong>Estimated Solar Output:</strong> {solarOutput} kWh</p>
+          <p><strong>Installation Cost:</strong> RM {installationCost}</p>
+          <p><strong>Solar Panel:</strong> {panelCount} pcs</p>
+          <p><strong>System Size:</strong> {systemSize} kW</p>
+          <p><strong>Property Type:</strong> {propertyType}</p>
+        </div>
+      )}
     </div>
-
-    <script>
-        function calculateSolar() {
-            let billAmount = parseInt(document.getElementById("billSlider").value);
-            let propertyType = document.getElementById("propertyType").value;
-            let solarOutput = 0;
-            
-            if (propertyType === "Landed House") {
-                let remainingBill = billAmount;
-                let totalKWh = 0;
-                let tiers = [
-                    { limit: 200, rate: 0.218 },
-                    { limit: 100, rate: 0.334 },
-                    { limit: 300, rate: 0.516 },
-                    { limit: 300, rate: 0.546 },
-                    { limit: Infinity, rate: 0.571 }
-                ];
-                
-                for (let tier of tiers) {
-                    let usage = Math.min(tier.limit, remainingBill / tier.rate);
-                    totalKWh += usage;
-                    remainingBill -= usage * tier.rate;
-                    if (remainingBill <= 0) break;
-                }
-                solarOutput = totalKWh.toFixed(2);
-            } else {
-                solarOutput = (billAmount / 0.55).toFixed(2);
-            }
-            
-            let systemSize = ((solarOutput / 165) * 1.2).toFixed(2);
-            let panelCount = Math.ceil(((systemSize * 1000) / 550) * 1.2);
-            let totalCost = ((billAmount * 72) * 0.82).toFixed(2);
-            
-            document.getElementById("billAmount").textContent = "RM " + billAmount;
-            document.getElementById("solarOutput").textContent = "Estimated Solar Output: " + solarOutput + " kWh";
-            document.getElementById("installationCost").textContent = "Estimated Installation Cost: RM " + totalCost;
-            document.getElementById("systemSize").textContent = "System Size: " + systemSize + " kW";
-            document.getElementById("solarPanels").textContent = "Solar Panels Needed: " + panelCount + " pcs";
-        }
-
-        calculateSolar();
-    </script>
-
-</body>
-</html>
-
+  );
+}
