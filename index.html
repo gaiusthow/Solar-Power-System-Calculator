@@ -1,62 +1,72 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Solar System Calculator</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { width: 50%; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px; }
-        .calculate-btn { background-color: green; color: white; padding: 10px; border: none; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <img src="TerraGreenEnergylogo.png" alt="Terra Energy" width="150">
-        <h2>Solar System Calculator</h2>
-        <label for="propertyType">Property Type:</label>
-        <select id="propertyType">
-            <option value="residential">Residential</option>
-            <option value="commercial">Commercial</option>
-        </select>
-        <br><br>
-        <label for="monthlyBill">Monthly Bill (RM):</label>
-        <input type="number" id="monthlyBill" min="100" max="1000" value="100">
-        <br><br>
-        <button class="calculate-btn" onclick="calculateSolar()">Calculate</button>
-        <h3>Results:</h3>
-        <p id="solarOutput"></p>
-        <p id="installationCost"></p>
-        <p id="systemSize"></p>
-        <p id="solarPanels"></p>
-    </div>
+import React, { useState } from "react";
 
-    <script>
-        function calculateSolar() {
-            let bill = parseFloat(document.getElementById('monthlyBill').value);
-            let propertyType = document.getElementById('propertyType').value;
-            let solarOutput, systemSize, panelsNeeded, installationCost;
-            
-            if (propertyType === "residential") {
-                if (bill >= 100 && bill < 200) { systemSize = 3.72; panelsNeeded = 6; installationCost = 19000; }
-                else if (bill >= 200 && bill < 300) { systemSize = 4.96; panelsNeeded = 8; installationCost = 20000; }
-                else if (bill >= 300 && bill < 400) { systemSize = 6.82; panelsNeeded = 11; installationCost = 22550; }
-                else if (bill >= 400 && bill < 500) { systemSize = 8.06; panelsNeeded = 13; installationCost = 29000; }
-                else if (bill >= 500 && bill < 600) { systemSize = 9.92; panelsNeeded = 16; installationCost = 32900; }
-                else if (bill >= 600 && bill < 700) { systemSize = 10.54; panelsNeeded = 17; installationCost = 34100; }
-                else if (bill >= 700 && bill < 900) { systemSize = 13.02; panelsNeeded = 21; installationCost = 38500; }
-                else if (bill >= 900) { systemSize = 16.12; panelsNeeded = 26; installationCost = 43100; }
-                solarOutput = systemSize * 137.6; 
-            } else {
-                solarOutput = bill / 0.55; 
-                systemSize = solarOutput / 137.6;
-                panelsNeeded = Math.ceil(systemSize * 1.6);
-                installationCost = systemSize * 3500;
-            }
-            
-            document.getElementById('solarOutput').innerHTML = `Estimated Solar Output: ${solarOutput.toFixed(2)} kWh`;
-            document.getElementById('installationCost').innerHTML = `Estimated Installation Cost: RM ${installationCost.toFixed(2)}`;
-            document.getElementById('systemSize').innerHTML = `System Size: ${systemSize.toFixed(2)} kW`;
-            document.getElementById('solarPanels').innerHTML = `Solar Panels Needed: ${panelsNeeded} pcs`;
-        }
-    </script>
-</body>
-</html>
+const solarData = [
+  { min: 100, max: 199, systemSize: 3.72, panels: 6, savings: 210, cost: 19000 },
+  { min: 200, max: 299, systemSize: 4.96, panels: 8, savings: 280, cost: 20000 },
+  { min: 300, max: 399, systemSize: 6.82, panels: 11, savings: 390, cost: 22550 },
+  { min: 400, max: 499, systemSize: 8.06, panels: 13, savings: 470, cost: 29000 },
+  { min: 500, max: 599, systemSize: 9.92, panels: 16, savings: 590, cost: 32900 },
+  { min: 600, max: 699, systemSize: 10.54, panels: 17, savings: 630, cost: 34100 },
+  { min: 700, max: 899, systemSize: 13.02, panels: 21, savings: 770, cost: 38000 },
+  { min: 900, max: 1000, systemSize: 16.12, panels: 26, savings: 960, cost: 43100 },
+];
+
+const SolarCalculator = () => {
+  const [bill, setBill] = useState(100);
+  const [propertyType, setPropertyType] = useState("residential");
+  
+  const getSolarDetails = () => {
+    let adjustedBill = bill;
+    if (propertyType === "commercial") {
+      adjustedBill = bill / 0.55; // Convert commercial bill to estimated kWh usage
+    }
+    
+    const match = solarData.find(
+      (data) => adjustedBill >= data.min && adjustedBill <= data.max
+    );
+
+    return match || { systemSize: 0, panels: 0, savings: 0, cost: 0 };
+  };
+
+  const { systemSize, panels, savings, cost } = getSolarDetails();
+
+  return (
+    <div className="p-6 bg-white rounded-lg shadow-lg text-center">
+      <img src="TerraGreenEnergylogo.png" alt="Terra Energy Logo" className="mx-auto mb-4 w-24" />
+      <h2 className="text-2xl font-bold">Terra Energy</h2>
+      <p className="text-lg mb-4">Solar System Calculator</p>
+
+      <label className="block font-semibold">Monthly Bill (RM):</label>
+      <input
+        type="range"
+        min="100"
+        max="1000"
+        value={bill}
+        onChange={(e) => setBill(Number(e.target.value))}
+        className="w-full"
+      />
+      <p className="text-xl font-bold">RM {bill}</p>
+
+      <label className="block font-semibold">Property Type:</label>
+      <select
+        value={propertyType}
+        onChange={(e) => setPropertyType(e.target.value)}
+        className="border p-2 rounded w-full mb-4"
+      >
+        <option value="residential">Residential</option>
+        <option value="commercial">Commercial</option>
+      </select>
+
+      <p>System Size: {systemSize} kW</p>
+      <p>Solar Panels Needed: {panels} pcs</p>
+      <p>Estimated Monthly Savings: RM {savings}</p>
+      <p>Estimated Installation Cost: RM {cost.toLocaleString()}</p>
+
+      <button className="mt-4 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">
+        Calculate
+      </button>
+    </div>
+  );
+};
+
+export default SolarCalculator;
