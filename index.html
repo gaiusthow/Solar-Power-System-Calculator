@@ -3,18 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solar Calculator - Terra Energy</title>
+    <title>Solar System Calculator</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .container { max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
-        input[type="range"], input[type="text"] { width: 100%; padding: 8px; margin: 5px 0; }
-        .result { margin-top: 20px; font-size: 18px; }
-        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input, select {
+            width: 80%;
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .slider {
+            width: 80%;
+        }
+        button {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <img src="terra_energy_logo.png" alt="Terra Energy Logo" width="200">
+        <img src="terra-energy-logo.png" alt="Terra Energy Logo" width="150">
         <h2>Solar System Calculator</h2>
 
         <label for="name">Name:</label>
@@ -23,33 +53,41 @@
         <label for="phone">Phone Number:</label>
         <input type="text" id="phone" placeholder="Enter your phone number">
 
-        <label for="monthlyBill">Monthly Bill (RM):</label>
-        <input type="range" id="monthlyBill" min="100" max="3000" step="50" value="400" oninput="updateCalculation()">
-        <p id="billAmount">RM 400</p>
+        <label for="billSlider">Monthly Bill (RM):</label>
+        <input type="range" id="billSlider" class="slider" min="100" max="3000" step="50" value="1000">
+        <p id="billAmount">RM 1000</p>
 
         <label for="propertyType">Property Type:</label>
-        <select id="propertyType" onchange="updateCalculation()">
-            <option value="landed">Landed House</option>
-            <option value="farm">Farm</option>
+        <select id="propertyType">
+            <option value="Landed House">Landed House</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Commercial">Commercial</option>
         </select>
 
-        <div class="result" id="solarOutput">Estimated Solar Output: - kWh</div>
+        <p id="solarOutput">Estimated Solar Output: 1666.67 kWh</p>
+        <p id="installationCost">Estimated Installation Cost: RM 59040</p>
+
         <button onclick="calculateSolar()">Calculate</button>
     </div>
 
     <script>
-        function updateCalculation() {
-            let bill = document.getElementById("monthlyBill").value;
-            document.getElementById("billAmount").innerText = "RM " + bill;
+        function calculateSolar() {
+            let billAmount = parseInt(document.getElementById("billSlider").value);
+            let estimatedOutput = (billAmount / 0.6).toFixed(2); // Adjust this formula if needed
+            let totalCost = ((billAmount * 72) * 0.82).toFixed(2); // Apply 18% discount
+
+            document.getElementById("billAmount").textContent = "RM " + billAmount;
+            document.getElementById("solarOutput").textContent = "Estimated Solar Output: " + estimatedOutput + " kWh";
+            document.getElementById("installationCost").textContent = "Estimated Installation Cost: RM " + totalCost;
         }
 
-        function calculateSolar() {
-            let bill = document.getElementById("monthlyBill").value;
-            let property = document.getElementById("propertyType").value;
-            let output = (bill / 0.6).toFixed(2); // Example calculation
-            document.getElementById("solarOutput").innerText = `Estimated Solar Output: ${output} kWh`;
-        }
+        document.getElementById("billSlider").addEventListener("input", function () {
+            calculateSolar();
+        });
+
+        // Initial calculation
+        calculateSolar();
     </script>
+
 </body>
 </html>
-
