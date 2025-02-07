@@ -7,96 +7,106 @@ export default function SolarCalculator() {
   const [propertyType, setPropertyType] = useState("Landed House");
   const [solarOutput, setSolarOutput] = useState(0);
   const [installationCost, setInstallationCost] = useState(0);
-  const [panelCount, setPanelCount] = useState(0);
   const [systemSize, setSystemSize] = useState(0);
-  
-  const calculateSolar = () => {
+  const [panelCount, setPanelCount] = useState(0);
+
+  const calculate = () => {
     if (!name || !phone) {
-      alert("Please enter your name and phone number before calculating.");
+      alert("Please enter your name and phone number to proceed.");
       return;
     }
     
-    const tnbResidentialRate = (bill <= 200) ? 0.218 : (bill <= 300) ? 0.334 : (bill <= 600) ? 0.516 : (bill <= 900) ? 0.546 : 0.571;
-    const tnbCommercialRate = 0.55;
-    const rate = propertyType === "Landed House" ? tnbResidentialRate : tnbCommercialRate;
+    const tnbResidentialRates = [
+      { limit: 200, rate: 0.218 },
+      { limit: 100, rate: 0.334 },
+      { limit: 300, rate: 0.516 },
+      { limit: 300, rate: 0.546 },
+      { limit: Infinity, rate: 0.571 },
+    ];
     
-    const estimatedSolarOutput = bill / rate;
-    const systemKW = (estimatedSolarOutput / 165) * 1.2;
-    const panelNeeded = Math.ceil((systemKW * 1000 / 550) * 1.2);
-    const estimatedCost = systemKW * 4920;
+    let effectiveRate = 0.55; 
+    if (propertyType === "Landed House") {
+      let remainingBill = bill;
+      effectiveRate = 0;
+      for (let tier of tnbResidentialRates) {
+        if (remainingBill > 0) {
+          let usage = Math.min(tier.limit, remainingBill);
+          effectiveRate += usage * tier.rate;
+          remainingBill -= usage;
+        }
+      }
+      effectiveRate = bill > 0 ? effectiveRate / bill : 0;
+    }
+
+    const estimatedSolarOutput = (bill / effectiveRate).toFixed(2);
+    const kwac = ((estimatedSolarOutput / 165) * 1.2).toFixed(2);
+    const panels = Math.ceil((kwac * 1000) / 550 * 1.2);
+    const estimatedInstallationCost = (kwac * 4920).toFixed(2);
     
-    setSolarOutput(estimatedSolarOutput.toFixed(2));
-    setSystemSize(systemKW.toFixed(1));
-    setPanelCount(panelNeeded);
-    setInstallationCost(estimatedCost.toFixed(2));
+    setSolarOutput(estimatedSolarOutput);
+    setInstallationCost(estimatedInstallationCost);
+    setSystemSize(kwac);
+    setPanelCount(panels);
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg text-center">
-      <img src="/logo.png" alt="Terra Energy Logo" className="mx-auto mb-2" />
-      <h2 className="text-xl font-bold mb-4">Solar System Calculator</h2>
-      
-      <div className="text-left mb-4">
-        <label className="block font-semibold">Name:</label>
-        <input 
-          type="text" 
-          className="border p-2 w-full" 
-          value={name} 
+    <div className="flex justify-center items-center h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded-xl shadow-md w-96">
+        <h2 className="text-xl font-bold text-center mb-4">Solar System Calculator</h2>
+        
+        <label className="block mb-1">Name:</label>
+        <input
+          type="text"
+          value={name}
           onChange={(e) => setName(e.target.value)}
+          className="w-full p-2 border rounded"
         />
-      </div>
-
-      <div className="text-left mb-4">
-        <label className="block font-semibold">Phone Number:</label>
-        <input 
-          type="text" 
-          className="border p-2 w-full" 
-          value={phone} 
+        
+        <label className="block mt-3 mb-1">Phone Number:</label>
+        <input
+          type="text"
+          value={phone}
           onChange={(e) => setPhone(e.target.value)}
+          className="w-full p-2 border rounded"
         />
-      </div>
-      
-      <div className="text-left mb-4">
-        <label className="block font-semibold">Bill (RM): {bill}</label>
-        <input 
-          type="range" 
-          min="50" 
-          max="1500" 
-          step="10" 
-          value={bill} 
-          onChange={(e) => setBill(Number(e.target.value))} 
+        
+        <label className="block mt-3 mb-1">Bill (RM):</label>
+        <input
+          type="range"
+          min="50"
+          max="2000"
+          value={bill}
+          onChange={(e) => setBill(Number(e.target.value))}
           className="w-full"
         />
-      </div>
-      
-      <div className="text-left mb-4">
-        <label className="block font-semibold">Property Type:</label>
-        <select 
-          className="border p-2 w-full" 
-          value={propertyType} 
+        <p className="text-center">RM {bill}</p>
+        
+        <label className="block mt-3 mb-1">Property Type:</label>
+        <select
+          value={propertyType}
           onChange={(e) => setPropertyType(e.target.value)}
+          className="w-full p-2 border rounded"
         >
           <option>Landed House</option>
           <option>Commercial</option>
         </select>
+        
+        <button
+          onClick={calculate}
+          className="mt-4 w-full bg-green-600 text-white py-2 rounded"
+        >
+          Calculate
+        </button>
+        
+        {solarOutput > 0 && (
+          <div className="mt-4 text-center">
+            <p>Estimated Solar Output: {solarOutput} kWh</p>
+            <p>Installation Cost: RM {installationCost}</p>
+            <p>System Size: {systemSize} kW</p>
+            <p>Solar Panels Needed: {panelCount} pcs</p>
+          </div>
+        )}
       </div>
-      
-      <button 
-        onClick={calculateSolar} 
-        className="bg-green-600 text-white px-4 py-2 rounded"
-      >
-        Calculate
-      </button>
-
-      {solarOutput > 0 && (
-        <div className="mt-4 text-left">
-          <p><strong>Estimated Solar Output:</strong> {solarOutput} kWh</p>
-          <p><strong>Installation Cost:</strong> RM {installationCost}</p>
-          <p><strong>Solar Panel:</strong> {panelCount} pcs</p>
-          <p><strong>System Size:</strong> {systemSize} kW</p>
-          <p><strong>Property Type:</strong> {propertyType}</p>
-        </div>
-      )}
     </div>
   );
 }
